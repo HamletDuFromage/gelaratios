@@ -2,7 +2,7 @@
 
 Minimal gelato ratio calculator (Svelte + Vite).
 
-Pick style (latte/uovo) and sweetener (dextrose/glucose syrup). Set batch size, edit any ingredient, and the rest adjust proportionally. Ratios come from 3000 g reference datasets.
+Pick style (latte/uovo) and sweetener (dextrose/glucose syrup). Set batch size, edit any ingredient, and the rest adjust proportionally.
 
 ## Run (dev)
 ```bash

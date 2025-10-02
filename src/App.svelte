@@ -155,9 +155,9 @@
       <label for="batch">Batch size</label>
       <div class="servings">
         <button on:click={() => setBatchSize(prev(totalGrams))} aria-label="decrease">−{INCREMENT}g</button>
-        <input id="batch" type="number" min="1" step="1" bind:value={totalGrams}
-          on:input={(e) => setBatchSize(Math.max(1, Number(e.currentTarget.value) || 0))}
-          on:change={(e) => setBatchSize(Math.max(1, Number(e.currentTarget.value) || 0))}>
+        <input id="batch" type="number" min="0" step="1" bind:value={totalGrams}
+          on:input={(e) => setBatchSize(Math.max(0, Number(e.currentTarget.value) || 0))}
+          on:change={(e) => setBatchSize(Math.max(0, Number(e.currentTarget.value) || 0))}>
         <button on:click={() => setBatchSize(next(totalGrams))} aria-label="increase">+{INCREMENT}g</button>
       </div>
     </div>
