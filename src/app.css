@@ -87,6 +87,14 @@ td .gram-input { width: 120px; text-align: right; }
   line-height: 1.4;
 }
 
+.site-footer {
+  margin: 32px auto;
+  width: min(100%, 920px);
+  padding: 0 20px 24px;
+}
+
+.gh-icon { opacity: 0.9; }
+
 /* Remove default number input spinners across browsers */
 input[type="number"] {
   -moz-appearance: textfield; /* Firefox */

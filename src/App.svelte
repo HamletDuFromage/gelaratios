@@ -287,3 +287,9 @@
     {/if}
   </section>
 </main>
+
+<footer class="site-footer">
+  <a class="gh-link" href="https://github.com/HamletDuFromage/gelaratios" target="_blank" rel="noreferrer">
+    <img class="gh-icon" src="/github-mark.svg" width="16" height="16" alt="GitHub" />
+  </a>
+</footer>
