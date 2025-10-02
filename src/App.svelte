@@ -83,37 +83,18 @@
   }
 
   function proportionalAdjust(editedKey, newGrams) {
-    // Preserve proportions: edited row set to new grams, others scaled proportionally.
+    // Always recalc from base proportions using the edited row as the anchor
     const clamped = Math.max(0, newGrams);
-    const edited = rows.find((r) => r.key === editedKey);
-    if (!edited) return;
-    
-    // If the edited ingredient was 0, restore from base recipe proportions
-    if (edited.grams === 0 && clamped > 0) {
-      const baseRows = getBasePercents();
-      const baseEdited = baseRows.find((r) => r.key === editedKey);
-      if (baseEdited) {
-        // Calculate what the total should be based on the new value and base percentage
-        const newTotal = (clamped / baseEdited.percent) * 100;
-        rows = baseRows.map((r) => ({ ...r, grams: round1((r.percent / 100) * newTotal) }));
-        totalGrams = newTotal;
-        return;
-      }
-    }
-    
-    // Calculate the scale factor based on the ratio of new to old grams for the edited ingredient
-    const scale = edited.grams > 0 ? clamped / edited.grams : 1;
-    
-    // Scale all other ingredients proportionally
-    rows = rows.map((r) => 
-      r.key === editedKey 
-        ? { ...r, grams: round1(clamped) }
-        : { ...r, grams: round1(r.grams * scale) }
-    );
-    
-    // Update total and recompute percents from grams
-    totalGrams = rows.reduce((a, r) => a + r.grams, 0);
-    rows = rows.map((r) => ({ ...r, percent: totalGrams > 0 ? (r.grams / totalGrams) * 100 : 0 }));
+    const baseRows = getBasePercents();
+    const baseEdited = baseRows.find((r) => r.key === editedKey);
+    if (!baseEdited || baseEdited.percent <= 0) return;
+
+    const newTotal = (clamped / baseEdited.percent) * 100;
+    totalGrams = round1(newTotal);
+    rows = baseRows.map((r) => ({
+      ...r,
+      grams: round1((r.percent / 100) * totalGrams),
+    }));
   }
 
   function setBatchSize(newTotal) {
@@ -183,7 +164,7 @@
   </section>
 
   <section>
-    <div class="summary">Total batch: <strong>{totalGrams}</strong> g · Tubs: <strong>{round2(totalGrams / INCREMENT)}</strong></div>
+    <div class="summary">Total batch: <strong>{Math.round(totalGrams)}</strong> g · Tubs: <strong>{round1(totalGrams / INCREMENT)}</strong></div>
     <div class="table-wrap">
       <table>
         <thead>
