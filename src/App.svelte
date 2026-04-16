@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { translations } from './lib/translations.js';
   // Source data (grams per 3000 g batch). We'll derive percents at runtime for accuracy.
   const SOURCE_GRAMS = {
     latte: {
@@ -48,11 +49,28 @@
 
   const INCREMENT = 750; // Standard gelato batch increment
   
-  let style = 'latte';
-  let base = 'glucose';
-  let totalGrams = INCREMENT;
+  let savedState = {};
+  if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('gelacalc_state');
+      if (saved) savedState = JSON.parse(saved);
+    } catch(e) {}
+  }
+
+  let locale = savedState.locale || 'en';
+  let style = (savedState.style && ['latte', 'uovo'].includes(savedState.style)) ? savedState.style : 'uovo';
+  let base = (savedState.base && ['glucose', 'syrup'].includes(savedState.base)) ? savedState.base : 'syrup';
+  let totalGrams = savedState.totalGrams || INCREMENT;
   let rows = [];
   let showRecipe = false;
+
+  $: t = translations[locale] || translations['en'];
+
+  $: {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('gelacalc_state', JSON.stringify({ locale, style, base, totalGrams }));
+    }
+  }
 
   const round1 = (n) => Math.round(n * 10) / 10;
   const round2 = (n) => Math.round(n * 100) / 100;
@@ -129,30 +147,36 @@
 </script>
 
 <main class="container">
-  <header>
-    <h1>Gelaratios</h1>
-    <p class="subtitle">Perfect gelato ratios</p>
+  <header style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+      <h1>{t.title}</h1>
+      <p class="subtitle">{t.subtitle}</p>
+    </div>
+    <select bind:value={locale} style="width: auto; margin-top: 16px;">
+      <option value="en">English</option>
+      <option value="fr">Français</option>
+    </select>
   </header>
 
   <section class="controls">
     <div class="control">
-      <label for="style">Style</label>
+      <label for="style">{t.style}</label>
       <select id="style" bind:value={style} on:change={loadRecipe}>
-        <option value="latte">Gelato al latte</option>
-        <option value="uovo">Gelato all'uovo</option>
+        <option value="latte">{t.styleLatte}</option>
+        <option value="uovo">{t.styleUovo}</option>
       </select>
     </div>
 
     <div class="control">
-      <label for="base">Sweetener</label>
+      <label for="base">{t.sweetener}</label>
       <select id="base" bind:value={base} on:change={loadRecipe}>
-        <option value="glucose">Dextrose</option>
-        <option value="syrup">Glucose syrup</option>
+        <option value="glucose">{t.sweetGlucose}</option>
+        <option value="syrup">{t.sweetSyrup}</option>
       </select>
     </div>
 
     <div class="control">
-      <label for="batch">Batch size</label>
+      <label for="batch">{t.batchSize}</label>
       <div class="servings">
         <button on:click={() => setBatchSize(prev(totalGrams))} aria-label="decrease">−{INCREMENT}g</button>
         <input id="batch" type="number" min="0" step="1" bind:value={totalGrams}
@@ -164,20 +188,20 @@
   </section>
 
   <section>
-    <div class="summary">Total batch: <strong>{Math.round(totalGrams)}</strong> g · Tubs: <strong>{round1(totalGrams / INCREMENT)}</strong></div>
+    <div class="summary">{t.totalBatch}: <strong>{Math.round(totalGrams)}</strong> g · {t.tubs}: <strong>{round1(totalGrams / INCREMENT)}</strong></div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Ingredient</th>
-            <th>Percent</th>
-            <th>Grams</th>
+            <th>{t.ingredient}</th>
+            <th>{t.percent}</th>
+            <th>{t.grams}</th>
           </tr>
         </thead>
         <tbody>
           {#each rows as row (row.key)}
             <tr>
-              <td>{row.name}</td>
+              <td>{t[row.key] || row.name}</td>
               <td><span class="percent">{round1(row.percent)}%</span></td>
               <td>
                 <input class="gram-input" type="number" min="0" step="1" value={row.grams}
@@ -190,7 +214,7 @@
         </tbody>
         <tfoot>
           <tr>
-            <td>Total</td>
+            <td>{t.total}</td>
             <td>{round1(rows.reduce((a, r) => a + r.percent, 0))}%</td>
             <td>{round1(rows.reduce((a, r) => a + r.grams, 0))}</td>
           </tr>
@@ -200,88 +224,88 @@
   </section>
 
   <div class="footnote">
-    <small>Edit fields directly to fine-tune; others adjust proportionally.</small>
+    <small>{t.footnote}</small>
   </div>
 
   <section class="recipe-section">
     <button class="recipe-toggle" on:click={() => showRecipe = !showRecipe}>
-      {showRecipe ? 'Hide' : 'Show'} Recipe Instructions
+      {showRecipe ? t.hideRecipe : t.showRecipe}
     </button>
     
     {#if showRecipe}
       <div class="recipe-content">
-        <h3>Homemade Gelato Recipe</h3>
+        <h3>{t.recipeTitle}</h3>
         
-        <h4>Equipment Needed</h4>
+        <h4>{t.equipTitle}</h4>
         <ul>
-          <li>Ice cream maker (compressor or freezer-bowl type)</li>
-          <li>Digital thermometer</li>
-          <li>Immersion blender</li>
-          <li>Whisk and mixing bowls</li>
-          <li>Pre-chilled storage container</li>
+          <li>{t.equip1}</li>
+          <li>{t.equip2}</li>
+          <li>{t.equip3}</li>
+          <li>{t.equip4}</li>
+          <li>{t.equip5}</li>
         </ul>
         
-        <h4>Base Preparation - Milk-Based Gelato</h4>
+        <h4>{t.baseLatteTitle}</h4>
         <ol>
-          <li><strong>Mix dry ingredients:</strong> Combine sugar, milk powder, dextrose (or glucose syrup), and locust bean gum in a bowl</li>
-          <li><strong>Heat liquids:</strong> Place milk and cream in a saucepan, heat to a light boil</li>
-          <li><strong>Combine:</strong> Pour hot liquid over dry ingredients while whisking vigorously to prevent lumps</li>
-          <li><strong>Cook:</strong> Return mixture to heat, bring to exactly 85°C (185°F) and maintain for 2 minutes</li>
-          <li><strong>Cool:</strong> Remove from heat and let cool to room temperature</li>
+          <li>{@html t.baseLatte1}</li>
+          <li>{@html t.baseLatte2}</li>
+          <li>{@html t.baseLatte3}</li>
+          <li>{@html t.baseLatte4}</li>
+          <li>{@html t.baseLatte5}</li>
         </ol>
         
-        <h4>Base Preparation - Egg-Based Gelato</h4>
+        <h4>{t.baseUovoTitle}</h4>
         <ol>
-          <li><strong>Mix dry ingredients:</strong> Combine milk powder, dextrose (or glucose syrup), and locust bean gum</li>
-          <li><strong>Prepare yolks:</strong> Beat sugar with egg yolks until pale and thick</li>
-          <li><strong>Combine dry with yolks:</strong> Gently fold dry ingredients into yolk mixture (don't beat)</li>
-          <li><strong>Heat liquids:</strong> Bring milk and cream to a boil</li>
-          <li><strong>Temper eggs:</strong> Slowly pour hot liquid into yolk mixture while whisking constantly</li>
-          <li><strong>Cook:</strong> Return to heat, bring to 85°C (185°F) and maintain for 2 minutes</li>
-          <li><strong>Cool:</strong> Remove from heat and let cool to room temperature</li>
+          <li>{@html t.baseUovo1}</li>
+          <li>{@html t.baseUovo2}</li>
+          <li>{@html t.baseUovo3}</li>
+          <li>{@html t.baseUovo4}</li>
+          <li>{@html t.baseUovo5}</li>
+          <li>{@html t.baseUovo6}</li>
+          <li>{@html t.baseUovo7}</li>
         </ol>
         
-        <h4>Flavoring & Final Steps</h4>
+        <h4>{t.flavorStepsTitle}</h4>
         <ol>
-          <li><strong>Add flavorings:</strong> Once base is cool, add your chosen flavoring ingredients</li>
-          <li><strong>Blend:</strong> Use immersion blender for 2 minutes to emulsify and incorporate air</li>
-          <li><strong>Mature:</strong> Refrigerate for 4-6 hours (overnight is best) to develop flavor and texture</li>
-          <li><strong>Churn:</strong> Process in ice cream maker for 40-45 minutes until thick and creamy</li>
-          <li><strong>Store:</strong> Transfer to pre-chilled container and freeze for 2-3 hours before serving</li>
+          <li>{@html t.flavorSteps1}</li>
+          <li>{@html t.flavorSteps2}</li>
+          <li>{@html t.flavorSteps3}</li>
+          <li>{@html t.flavorSteps4}</li>
+          <li>{@html t.flavorSteps5}</li>
         </ol>
         
-        <h4>Popular Flavor Variations</h4>
+        <h4>{t.flavorVarTitle}</h4>
         <div class="flavor-grid">
           <div class="flavor-item">
-            <strong>Fiordilatte (Plain):</strong> Use the base without additions
+            {@html t.flavorFiordilatte}
           </div>
           <div class="flavor-item">
-            <strong>Vanilla:</strong> Split 1 vanilla bean lengthwise, boil with milk, let steep 1 hour, strain before using
+            {@html t.flavorVanilla}
           </div>
           <div class="flavor-item">
-            <strong>Chocolate:</strong> Add {round1((37 * totalGrams) / 750)}g unsweetened cocoa powder to {totalGrams}g base after cooking
+            {@html t.flavorChocPre} {round1((37 * totalGrams) / 750)}{t.flavorChocPost} {totalGrams}{t.flavorChocEnd}
           </div>
           <div class="flavor-item">
-            <strong>Stracciatella:</strong> Add {round1((60 * totalGrams) / 750)}g melted dark chocolate while churning (last 2 minutes)
+            {@html t.flavorStracPre} {round1((60 * totalGrams) / 750)}{t.flavorStracPost}
           </div>
           <div class="flavor-item">
-            <strong>Hazelnut/Pistachio:</strong> Add {round1((37 * totalGrams) / 750)}g pure nut paste to {totalGrams}g base after cooking
+            {@html t.flavorHazelPre} {round1((37 * totalGrams) / 750)}{t.flavorHazelPost} {totalGrams}{t.flavorHazelEnd}
           </div>
           <div class="flavor-item">
-            <strong>Almond:</strong> Add {round1((60 * totalGrams) / 750)}g pure almond paste to {totalGrams}g base after cooking
+            {@html t.flavorAlmondPre} {round1((60 * totalGrams) / 750)}{t.flavorAlmondPost} {totalGrams}{t.flavorAlmondEnd}
           </div>
           <div class="flavor-item">
-            <strong>Coffee:</strong> Add {round1((15 * totalGrams) / 750)}g instant coffee powder to {totalGrams}g base after cooking
+            {@html t.flavorCoffeePre} {round1((15 * totalGrams) / 750)}{t.flavorCoffeePost} {totalGrams}{t.flavorCoffeeEnd}
           </div>
-  </div>
+        </div>
 
-        <h4>Tips for Success</h4>
+        <h4>{t.tipsTitle}</h4>
         <ul>
-          <li>Always use a thermometer - temperature is crucial for proper texture</li>
-          <li>Pre-chill your storage container in the freezer for 30 minutes</li>
-          <li>Don't skip the maturation step - it improves flavor and texture</li>
-          <li>Churn until the mixture looks like soft-serve ice cream</li>
-          <li>Store in an airtight container to prevent ice crystals</li>
+          <li>{t.tip1}</li>
+          <li>{t.tip2}</li>
+          <li>{t.tip3}</li>
+          <li>{t.tip4}</li>
+          <li>{t.tip5}</li>
         </ul>
       </div>
     {/if}
