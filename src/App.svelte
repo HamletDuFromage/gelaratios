@@ -4,11 +4,11 @@
   // Source data (grams per 3000 g batch). We'll derive percents at runtime for accuracy.
   const SOURCE_GRAMS = {
     latte: {
-      // dextrose base
+      // atomized glucose base
       glucose: [
         { key: 'milk', name: 'Whole milk', grams3000: 1740 },
         { key: 'sucrose', name: 'Sugar (sucrose)', grams3000: 480 },
-        { key: 'dextrose', name: 'Dextrose', grams3000: 44 },
+        { key: 'atomized_glucose', name: 'Atomized glucose', grams3000: 44 },
         { key: 'cream', name: 'Cream (35%)', grams3000: 600 },
         { key: 'skim_powder', name: 'Skim milk powder', grams3000: 120 },
         { key: 'lbg', name: 'Locust bean gum', grams3000: 16 },
@@ -24,11 +24,11 @@
       ],
     },
     uovo: {
-      // dextrose base
+      // atomized glucose base
       glucose: [
         { key: 'milk', name: 'Whole milk', grams3000: 1652 },
-        { key: 'sucrose', name: 'Sugar (sucrose)', grams3000: 448 },
-        { key: 'dextrose', name: 'Dextrose', grams3000: 60 },
+        { key: 'sucrose', name: 'Sugar (sucrose)', grams3000: 388 },
+        { key: 'atomized_glucose', name: 'Atomized glucose', grams3000: 120 },
         { key: 'cream', name: 'Cream (35%)', grams3000: 540 },
         { key: 'skim_powder', name: 'Skim milk powder', grams3000: 132 },
         { key: 'yolk', name: 'Egg yolk', grams3000: 152 },
@@ -170,7 +170,7 @@
     <div class="control">
       <label for="base">{t.sweetener}</label>
       <select id="base" bind:value={base} on:change={loadRecipe}>
-        <option value="glucose">{t.sweetGlucose}</option>
+        <option value="glucose">{t.atomizedGlucose}</option>
         <option value="syrup">{t.sweetSyrup}</option>
       </select>
     </div>
