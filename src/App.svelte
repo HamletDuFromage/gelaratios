@@ -170,7 +170,7 @@
     <div class="control">
       <label for="base">{t.sweetener}</label>
       <select id="base" bind:value={base} on:change={loadRecipe}>
-        <option value="glucose">{t.atomizedGlucose}</option>
+        <option value="glucose">{t.atomized_glucose}</option>
         <option value="syrup">{t.sweetSyrup}</option>
       </select>
     </div>
